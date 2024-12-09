@@ -435,7 +435,8 @@
          [new-row (posn-y new-pos)]
          [new-col (posn-x new-pos)])
     ; Make the move on the test board
-    (move-piece-board test-state (make-posn orig-row orig-col) (make-posn new-row new-col))
+    (vector-set! (vector-ref test-state orig-row) orig-col 0)
+    (vector-set! (vector-ref test-state new-row) new-col piece)
     ; Check if the king would be in check after this move
     (king-in-check? (piece-color piece) test-state)))
 
