@@ -2,29 +2,29 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname logic) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
 (require racket/base)
+(require 2htdp/image)
+(require 2htdp/universe)
+
 (provide get-piece)
 (provide piece?)
 (provide piece-type)
 (provide calculate-all-moves)
 (provide piece-movement)
 (provide piece-repeatable?)
-(provide BOARD-VECTOR)
-(provide DIAGONAL-MOVES)
-(provide KNIGHT-MOVES)
-(provide KING-QUEEN-MOVES)
-(provide VERTICAL-MOVES)
-(provide ROOK-MOVES)
-(provide move-piece)
+(provide move-piece-board)
 (provide is-there-piece?)
 (provide is-there-opponent-piece?)
 (provide set-null)
 (provide set-piece)
 (provide my-piece?)
 (provide in-bounds?)
-(require 2htdp/image)
-(require 2htdp/universe)
-(provide piece-color)
 (provide piece)
+
+(provide DIAGONAL-MOVES)
+(provide KNIGHT-MOVES)
+(provide KING-QUEEN-MOVES)
+(provide VERTICAL-MOVES)
+(provide ROOK-MOVES)
 
 (require "piece.rkt")
 
@@ -57,6 +57,7 @@
     (set-piece new-posn)
     (set-null current-posn)))
 
+
 ;; HELPER FUNCTIONS FOR 'move-piece'
 ; set-piece: Posn -> void
 (define (set-piece position)
@@ -65,6 +66,23 @@
 ; set-null : Posn -> void
 (define (set-null position)
     (vector-set! (vector-ref BOARD-VECTOR (posn-y position)) (posn-x position) 0))
+
+
+; moves piece from original posn position to new position, and mutates BOARD-VECTOR accordingly
+(define (move-piece-board chessboard current-posn new-posn)
+  (begin
+    (set-piece-board chessboard new-posn)
+    (set-null-board chessboard current-posn)))
+
+;; HELPER FUNCTIONS FOR 'move-piece-vector'
+; set-piece: Posn -> void
+(define (set-piece-board chessboard position)
+  (vector-set! (vector-ref chessboard (posn-y position)) (posn-x position) (get-piece position)))
+
+; set-null : Posn -> void
+(define (set-null-board chessboard position)
+    (vector-set! (vector-ref chessboard (posn-y position)) (posn-x position) 0))
+
 
 ; checkmate : Posn -> Void
 ; checks for checkmate, if so, end game.
