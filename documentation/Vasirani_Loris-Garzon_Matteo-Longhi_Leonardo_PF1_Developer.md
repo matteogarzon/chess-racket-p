@@ -3,7 +3,7 @@
 - how the functions are combined together
 - which libraries are used for what purpose.
 
-Our project has 3 source files: 
+Our project has 3+2 source files: 
 
 ### main.rkt
 
@@ -80,6 +80,10 @@ Other functions defined are:
 -move-right-diagonal: allows the piece to move diagonally to the right.
 
 ---
+
+### piece.rkt
+
+- It
 
 ### server.rkt
 
