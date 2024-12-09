@@ -919,3 +919,90 @@
   (on-key handle-key)
   (stop-when can-quit?)
   (to-draw render))
+
+;;;; CONTROLLA!!!!!!!!!!
+
+
+;; king-in-checkmate?: Color AppState -> Boolean
+; checks if a king is in checkmate
+; INPUTS: king-color - color of the king to check
+;         state - current game state
+; RETURNS: true if the king is in checkmate, false otherwise
+(define (king-in-checkmate? king-color state)
+  (and (king-in-check? king-color state)  ; Re sotto scacco
+       (not (exists-valid-move? king-color state))))  ; Nessuna mossa valida
+
+;; exists-valid-move?: Color AppState -> Boolean
+; checks if there exists any valid move that removes check
+; INPUTS: color - color of the pieces to check
+;         state - current game state
+; RETURNS: true if a valid move exists, false otherwise
+(define (exists-valid-move? color state)
+  (let check-pieces ([row 0])
+    (if (< row 8)
+        (let check-col ([col 0])
+          (if (< col 8)
+              (let ([piece (vector-ref (vector-ref state row) col)])
+                (if (and (piece? piece)
+                        (piece-present? piece)
+                        (equal? (piece-color piece) color))
+                    ; Per ogni pezzo del colore giusto
+                    (let ([pos (make-posn col row)])
+                      (let check-moves ([moves (get-valid-moves piece pos state)])
+                        (if (empty? moves)
+                            (check-col (add1 col))  ; Nessuna mossa valida per questo pezzo
+                            (let* ([test-state (vector-copy-deep state)]
+                                   [test-move (first moves)])
+                              ; Prova la mossa
+                              (handle-move test-state test-move)
+                              ; Se la mossa rimuove lo scacco, abbiamo trovato una mossa valida
+                              (if (not (king-in-check? color test-state))
+                                  #true
+                                  (check-moves (rest moves)))))))
+                    (check-col (add1 col))))
+              (check-pieces (add1 row))))
+        #false)))  ; Nessuna mossa valida trovata
+
+;; Modifica handle-mouse per usare king-in-checkmate?
+(define (handle-mouse state x y event)
+  (if game-over
+      state
+      (cond
+        [(equal? event "button-down")
+         (let* ([clicked-pos (which-square? x y)]
+                [row (posn-y clicked-pos)]
+                [col (posn-x clicked-pos)]
+                [clicked-piece (vector-ref (vector-ref state row) col)])
+           (cond
+             [(and selected-piece 
+                   (member clicked-pos (get-valid-moves selected-piece selected-pos state)))
+              (let* ([test-state (vector-copy-deep state)]
+                    [moving-color (piece-color selected-piece)])
+                (handle-move test-state clicked-pos)
+                (if (king-in-check? moving-color test-state)
+                    (begin
+                      (set! selected-piece #f)
+                      (set! selected-pos #f)
+                      state)
+                    (begin
+                      (let ([new-state (handle-move state clicked-pos)])
+                        ; Controlla scacco matto per l'avversario
+                        (let ([opponent-color (if (equal? moving-color "white") "black" "white")])
+                          (when (king-in-checkmate? opponent-color new-state)
+                            (set! game-over #t)))
+                        (set! selected-piece #f)
+                        (set! selected-pos #f)
+                        new-state))))]
+             [(and (piece? clicked-piece) 
+                   (piece-present? clicked-piece)
+                   (equal? (piece-color clicked-piece) turn-color))
+              (begin
+                (set! selected-piece clicked-piece)
+                (set! selected-pos clicked-pos)
+                state)]
+             [else
+              (begin
+                (set! selected-piece #f)
+                (set! selected-pos #f)
+                state)]))]
+        [else state])))
