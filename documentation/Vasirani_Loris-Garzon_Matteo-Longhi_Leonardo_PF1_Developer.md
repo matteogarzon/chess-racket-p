@@ -3,11 +3,14 @@
 - how the functions are combined together
 - which libraries are used for what purpose.
 
-Our project has 4 source files: 
+Our project has 3 source files: 
 
-### MAIN.rkt
+### main.rkt
 
 - This is entry point of the program.
+- We used the image and universe libraries for the graphics of the pieces and the chessboard and for creating the UI of the game.
+- The functions defined are:
+-
 
 ---
 
