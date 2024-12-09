@@ -480,7 +480,7 @@
 
 ;;;;; Handle mouse events ;;;;;
 
-(define turn-color "white") ; "b" or "w" (w starts!)
+(define turn-color "white") ; "black" or "white" (w starts!)
 (define selected-piece #f)
 (define selected-pos #f)
 (define game-over #f)
