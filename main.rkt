@@ -813,7 +813,8 @@
     (text "• Press 'q' to end the game anytime." 18 TEXT-COLOR))
    (rectangle TEXT-BACKGROUND-WIDTH TEXT-BACKGROUND-HEIGHT "solid" TEXT-BACKGROUND-COLOR)))
 
-;; Main welcome screen scene
+; render-welcome: AppState -> Scene
+; main welcome screen
 (define (render-welcome state)
   (place-images
    (list TITLE-TEXT
@@ -824,7 +825,8 @@
          (make-posn (/ WINDOW-WIDTH 2) (/ WINDOW-HEIGHT 2)))
    (empty-scene WINDOW-WIDTH WINDOW-HEIGHT "azure")))
 
-
+; render-screen: AppState -> Scene
+; renders the prompt scene to end the game
 (define (render-exit state)
   (place-image
    (text "Press 'y' to end the game.\nTo resume, press 'n'." 
@@ -834,8 +836,8 @@
    (/ WINDOW-HEIGHT 2)
    (empty-scene WINDOW-WIDTH WINDOW-HEIGHT "honeydew")))
 
-
 ; end-game : void
+; Retuerns to the welcome page and resets the chessboard
 (define (end-game)
  (begin
    (set! GAME-STATE "NO-GAME")
