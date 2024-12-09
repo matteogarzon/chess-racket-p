@@ -56,28 +56,10 @@ Other functions defined are:
 
 - in-bounds?: checks if a position is inside the chessboard boundaries.
 - get-piece: retrieves a piece at a given position
-- move-piece: moves a piece from one position to another (by passing two posns)
+- move-piece-board: moves a piece from one position to another (by passing two posns)
 - set-piece/set-null: helper functions to update board state (called by move-piece)
 - in-bounds?: predicate that checks if the passed posn is within the board boundaries
-- my-piece?: predicate that checks if a piece belongs to the local player
-- is-there-piece?: predicate that checks if any piece exists at the given posn
-- is-there-opponent-piece?: predicate that checks if there’s an opponent’s piece at the given posn
-- move-one-forward?: checks if the piece can move one square forward.
-- move-two-forward?: checks if the piece can move two squares forward, like the pawn in its first move.
-- move-left-diagonal?: checks if the piece can move diagonally to the left.
-- move-right-diagonal?: checks if the piece can move diagonally to the right.
-- move-piece-board: moves the piece from its initial position to another one and updates the board accordingly.
-- set-piece-board: sets a piece on the chessboard.
-- set-null-board: removes a piece from a certain position on the chessboard.
-- checkmate: checks if a move results in a checkmate and so if the game ends according to that.
-- can-move-two-right?: checks if a piece can move two squares to the right .
-- can-move-two-left?: checks if a piece ca move two square to the left.
-- can-castle-right?: checks if the king can castle to the right.
-- can-castle-left?: checks if the king can castle to the left.
-- castling: allows castling when possible.
--move-one-forward: allows the piece to move one square forward.
--move-left-diagonal: allows the piece to move diagonally to the left.
--move-right-diagonal: allows the piece to move diagonally to the right.
+
 
 ---
 

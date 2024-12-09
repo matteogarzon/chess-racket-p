@@ -4,7 +4,6 @@
 
 - This is a chess game that can be played by two players on the same computer.
 
-
 ### How to use the program
 
 The gameplay is straightforward:
