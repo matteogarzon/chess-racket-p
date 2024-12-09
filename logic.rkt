@@ -5,7 +5,6 @@
 (provide get-piece)
 (provide piece?)
 (provide piece-type)
-(provide possible-pawn-moves)
 (provide calculate-all-moves)
 (provide piece-movement)
 (provide piece-repeatable?)
@@ -26,7 +25,6 @@
 (require 2htdp/universe)
 (provide piece-color)
 (provide piece)
-; (provide (struct-out piece))
 
 (require "piece.rkt")
 
@@ -211,61 +209,6 @@
       [left  
        (list (make-posn (- (posn-x current-position) 2) (posn-y current-position)))]
       [else #f])))
-
-;;;;;;;;;;;;;;;
-;; PAWN ONLY ;;
-;;;;;;;;;;;;;;;
-
-; possible-pawn-moves : List<Posn> Posn -> List<Posn>
-; returns list of possible moves for pawns
-; function calls itself
-
-(define (possible-pawn-moves possible-moves current-position)
-  (local [(define row (posn-y current-position))
-          (define col (posn-x current-position))
-          (define piece (get-piece current-position))
-          
-          ; Forward moves
-          (define forward-pos (make-posn col (+ row 1)))
-          (define two-forward-pos (make-posn col (+ row 2)))
-          
-          ; Diagonal captures
-          (define right-diag (make-posn (+ col 1) (+ row 1)))
-          (define left-diag (make-posn (- col 1) (+ row 1)))]
-    
-    (let ([moves '()])
-      ; Add forward move if square is empty
-      (when (and (in-bounds? forward-pos)
-                 (not (is-there-piece? forward-pos)))
-        (set! moves (cons forward-pos moves)))
-        
-      ; Add two-square move if at starting position and path is clear
-      (when (and (or (and (equal? (piece-color piece) "white") (= row 6))
-                     (and (equal? (piece-color piece) "black") (= row 1)))
-                (in-bounds? two-forward-pos)
-                (not (is-there-piece? forward-pos)) ; Ensure path is clear
-                (not (is-there-piece? two-forward-pos)))
-        (set! moves (cons two-forward-pos moves)))
-      
-      ; Add diagonal captures
-      (when (and (in-bounds? right-diag)
-                 (is-there-piece? right-diag)
-                 (not (equal? (piece-color piece)
-                            (piece-color (get-piece right-diag)))))
-        (set! moves (cons right-diag moves)))
-      
-      (when (and (in-bounds? left-diag)
-                 (is-there-piece? left-diag)
-                 (not (equal? (piece-color piece)
-                            (piece-color (get-piece left-diag)))))
-        (set! moves (cons left-diag moves)))
-      
-      (append possible-moves moves))))
-
-; Examples (use BOARD-VECTOR as reference)
-(check-expect (possible-pawn-moves '() (make-posn 3 1)) (list (make-posn 3 2) (make-posn 3 3))) ; starting position
-(check-expect (possible-pawn-moves '() (make-posn 3 2)) (list (make-posn 3 3)))
-(check-expect (possible-pawn-moves '() (make-posn 5 5)) (list (make-posn 6 6) (make-posn 4 6)))
 
 ;;;;;;;;;;;;;;;;;;;
 ;; NON-PAWN ONLY ;;

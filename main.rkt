@@ -14,7 +14,7 @@
 (provide render)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;; Data type ;;;;;;;;;;
+;;;;;;;;;; Data Type ;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; a Piece is a structure:
@@ -143,8 +143,6 @@
 (define knight-width (image-width B-KNIGHT-IMAGE))   ; Knight width
 (define knight-height (image-height B-KNIGHT-IMAGE)) ; Knight height
 
-; Defining the chessboard pieces
-; White pawns
 ; Defining the chessboard pieces
 ; White pawns
 (define W-PAWN1 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
@@ -350,7 +348,10 @@
           (cons attacker-pos path-positions))
         '())))
 
-;;;;; render ;;;;;
+
+; render-chessboard : AppState -> Scene
+; renders the chessboard based on the AppState
+; header: (define (render-chessboard state) Scene)
 
 ;; Implementation
 (define (render-chessboard state)
@@ -424,9 +425,9 @@
     [(string=? "white" turn-color) "Player 1 wins!"]
     [else "Player 2 wins!"]))
 
+
 ; would-be-in-check? : Piece Posn Posn AppState -> Boolean
 ; checks if a move would put the king in check
-
 ;; Implementation
 (define (would-be-in-check? piece orig-pos new-pos state)
   (let* ([test-state (vector-copy-deep state)]
@@ -443,7 +444,6 @@
 ; vector-copy-deep : Vector<Any> -> Vector<Any>
 ; Helper function to deep copy a vector (needed for the test board)
 ; header: (define (vector-copy-deep v) v)
-
 ;; Implementation
 (define (vector-copy-deep v)
   (let* ([len (vector-length v)]
@@ -463,7 +463,6 @@
 ; which-square? : Number Number -> Posn
 ; Converts mouse coordinates to board position
 ; header: (define (which-square? Piece) (make-posn 1 1))
-
 ;; Implementation
 (define (which-square? x y)
   (make-posn (floor (/ x SQUARE-SIDE))
@@ -473,7 +472,6 @@
 ; same-color? : Piece Piece -> Boolean
 ; says if two pieces have the same color
 ; header: (define (same-color? dragged-piece pieces) #true)
-
 ;; Implementation
 (define (same-color? dragged-piece piece)
   (and (piece-present? dragged-piece)
@@ -484,7 +482,6 @@
 ; make-transparent : Piece -> Piece
 ; makes a piece with 'present?' sets to #false transparent
 ; header: (define (make-trasnparent eaten-piece) B-PAWN1)
-
 ;; Implementation
 (define (make-transparent piece)
   (if (false? (piece-present? piece))
@@ -500,6 +497,7 @@
                   (piece-present? piece))
       piece)) ; Return unchanged if present? is true
 
+; eate-piece : 
 ;; Implementation
 (define (eaten-piece current-pos target-pos)
   (let ([target-piece (get-piece target-pos)])

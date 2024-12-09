@@ -4,3 +4,5 @@ main-2.rkt
 Images/.DS_Store
 .DS_Store
 main.rkt~
+logic.rkt~
+piece.rkt~
