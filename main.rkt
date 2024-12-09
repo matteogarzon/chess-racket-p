@@ -436,8 +436,6 @@
          [new-col (posn-x new-pos)])
     ; Make the move on the test board
     (move-piece-board test-state (make-posn orig-row orig-col) (make-posn new-row new-col))
-    ; (vector-set! (vector-ref test-state orig-row) orig-col 0)
-    ; (vector-set! (vector-ref test-state new-row) new-col piece)
     ; Check if the king would be in check after this move
     (king-in-check? (piece-color piece) test-state)))
 
@@ -586,15 +584,15 @@
           state)
         state)))
 
-
+; change-turn : void -> void
+; changes the value of turn-color
 (define (change-turn)
   (cond
     [(string=? turn-color "white") (set! turn-color "black")]
     [else (set! turn-color "white")]))
 
 
-;;;;; get-valid-moves ;;;;;
-
+; get-valid-moves
 (define (get-valid-moves piece pos state)
   (let ([moves
          (cond
@@ -863,7 +861,6 @@
     (set! game-over #f)
     (vector-copy! INITIAL-STATE 0 BOARD-STATE)))
 
-
 ; handle-key: AppState KeyEvent -> AppState
 ; modify state 's' in response to 'key' being pressed
 ; header: (define (handle-key s key) s)
@@ -912,6 +909,8 @@
     [(string=? "END-CONFIRMATION" GAME-STATE) (render-exit state)]
     [else (render-welcome state)]))
 
+; can-quit? : AppState -> Booelan
+; whether app can quit or not.
 (define (can-quit? state) quit?)
 
 (big-bang INITIAL-STATE
