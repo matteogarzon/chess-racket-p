@@ -255,7 +255,6 @@
                 scene)))
 
 ; vector-to-list-of-lists : Vector<Vector> -> List<List>>
-;
 ; header:
 
 ;; Implementation
@@ -436,8 +435,9 @@
          [new-row (posn-y new-pos)]
          [new-col (posn-x new-pos)])
     ; Make the move on the test board
-    (vector-set! (vector-ref test-state orig-row) orig-col 0)
-    (vector-set! (vector-ref test-state new-row) new-col piece)
+    (move-piece-board test-state (make-posn orig-row orig-col) (make-posn new-row new-col))
+    ; (vector-set! (vector-ref test-state orig-row) orig-col 0)
+    ; (vector-set! (vector-ref test-state new-row) new-col piece)
     ; Check if the king would be in check after this move
     (king-in-check? (piece-color piece) test-state)))
 
@@ -478,38 +478,9 @@
        (piece-present? piece)
        (equal? (piece-color dragged-piece) (piece-color piece))))
 
-
-; make-transparent : Piece -> Piece
-; makes a piece with 'present?' sets to #false transparent
-; header: (define (make-trasnparent eaten-piece) B-PAWN1)
-;; Implementation
-(define (make-transparent piece)
-  (if (false? (piece-present? piece))
-      (make-piece (piece-type piece)
-                  (piece-movement piece)
-                  (piece-repeatable? piece)
-                  (piece-player piece)
-                  (piece-color piece)
-                  (piece-selected? piece)
-                  (rectangle 0 0 "solid" "transparent")
-                  (piece-width piece)
-                  (piece-height piece)
-                  (piece-present? piece))
-      piece)) ; Return unchanged if present? is true
-
-; eate-piece : 
-;; Implementation
-(define (eaten-piece current-pos target-pos)
-  (let ([target-piece (get-piece target-pos)])
-    (when (and target-piece 
-               (piece? target-piece)
-               (not (equal? (piece-color (get-piece current-pos))
-                          (piece-color target-piece))))
-      (move-piece current-pos target-pos))))
-
 ;;;;; Handle mouse events ;;;;;
 
-(define turn-color "white") ; "b" or "w" (w starts!)
+(define turn-color "white") ; "black" or "white" (w starts!)
 (define selected-piece #f)
 (define selected-pos #f)
 (define game-over #f)

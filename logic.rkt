@@ -2,29 +2,26 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname logic) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
 (require racket/base)
+(require 2htdp/image)
+(require 2htdp/universe)
+
 (provide get-piece)
-(provide piece?)
-(provide piece-type)
-(provide calculate-all-moves)
 (provide piece-movement)
 (provide piece-repeatable?)
-(provide BOARD-VECTOR)
-(provide DIAGONAL-MOVES)
-(provide KNIGHT-MOVES)
-(provide KING-QUEEN-MOVES)
-(provide VERTICAL-MOVES)
-(provide ROOK-MOVES)
-(provide move-piece)
+(provide move-piece-board)
 (provide is-there-piece?)
 (provide is-there-opponent-piece?)
 (provide set-null)
 (provide set-piece)
 (provide my-piece?)
 (provide in-bounds?)
-(require 2htdp/image)
-(require 2htdp/universe)
-(provide piece-color)
 (provide piece)
+
+(provide DIAGONAL-MOVES)
+(provide KNIGHT-MOVES)
+(provide KING-QUEEN-MOVES)
+(provide VERTICAL-MOVES)
+(provide ROOK-MOVES)
 
 (require "piece.rkt")
 
@@ -57,6 +54,7 @@
     (set-piece new-posn)
     (set-null current-posn)))
 
+
 ;; HELPER FUNCTIONS FOR 'move-piece'
 ; set-piece: Posn -> void
 (define (set-piece position)
@@ -65,6 +63,23 @@
 ; set-null : Posn -> void
 (define (set-null position)
     (vector-set! (vector-ref BOARD-VECTOR (posn-y position)) (posn-x position) 0))
+
+
+; moves piece from original posn position to new position, and mutates BOARD-VECTOR accordingly
+(define (move-piece-board chessboard current-posn new-posn)
+  (begin
+    (set-piece-board chessboard new-posn)
+    (set-null-board chessboard current-posn)))
+
+;; HELPER FUNCTIONS FOR 'move-piece-vector'
+; set-piece: Posn -> void
+(define (set-piece-board chessboard position)
+  (vector-set! (vector-ref chessboard (posn-y position)) (posn-x position) (get-piece position)))
+
+; set-null : Posn -> void
+(define (set-null-board chessboard position)
+    (vector-set! (vector-ref chessboard (posn-y position)) (posn-x position) 0))
+
 
 ; checkmate : Posn -> Void
 ; checks for checkmate, if so, end game.
@@ -209,49 +224,3 @@
       [left  
        (list (make-posn (- (posn-x current-position) 2) (posn-y current-position)))]
       [else #f])))
-
-;;;;;;;;;;;;;;;;;;;
-;; NON-PAWN ONLY ;;
-;;;;;;;;;;;;;;;;;;;
-
-; calculate-move : List<Posn>, Posn, Boolean -> List<Posn>
-; calculates possible moves based on single 'move' and 'current position'
-; header:
-
-(define (calculate-move new-moves move current-position is-repeatable)
-  (local [(define new-posn (make-posn (+ (posn-x move) (posn-x current-position))
-                                      (+ (posn-y move) (posn-y current-position))))]
-    (cond
-      [(and (in-bounds? new-posn)
-            (or (not (is-there-piece? new-posn))
-                (is-there-opponent-piece? new-posn)))
-       (if (is-there-piece? new-posn)
-           (append new-moves (list new-posn)) ; Stop if there's a piece
-           (if is-repeatable
-               (calculate-move (append new-moves (list new-posn)) move new-posn is-repeatable)
-               (append new-moves (list new-posn))))]
-      [else new-moves])))
-
-; examples:
-(check-expect (calculate-move '() (make-posn 1 0) (make-posn 2 3) true) (list (make-posn 3 3) (make-posn 4 3) (make-posn 5 3) (make-posn 6 3) (make-posn 7 3)))
-(check-expect (calculate-move '() (make-posn 2 1) (make-posn 2 3) false) (list (make-posn 4 4))) ;; CHECK-EXPECT
-
-; calculate-all-moves : Posn, List<Posn>, Boolean -> List<List<Posn>>
-; from position and type of movement of piece, returns possible moves
-; used for non-pawn pieces
-; header: (define (possible-moves (make-posn 1 0) KING-QUEEN-MOVES true) '((posn 1 2) (posn 1 3)))
-
-(define (calculate-all-moves current-position movements is-repeatable)
-  (apply append
-         (map (lambda (move) (calculate-move '() move current-position is-repeatable))
-              movements)))
-
-(define (calculate-all-kings-moves current-position movements is-repeatable)
-  (let ([castling-moves (castling current-position)]
-        [normal-moves (calculate-all-moves current-position movements is-repeatable)])
-    (if castling-moves
-        (append castling-moves normal-moves)
-        normal-moves)))
-
-; examples:
-(calculate-all-moves (make-posn 3 1) DIAGONAL-MOVES true)
