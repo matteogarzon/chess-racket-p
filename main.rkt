@@ -1,10 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname main) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
-;%%%%%%%%%%%%%%%%%%%%;
-;#### CHESS GAME ####;
-;%%%%%%%%%%%%%%%%%%%%;
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; Libraries ;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -105,8 +101,8 @@
 
 ; Setting the images of the pieces
 ; Pawns
-(define B-PAWN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-pawn.png"))) ; Black pawn 1
-(define W-PAWN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-pawn.png"))) ; White pawn 1
+(define B-PAWN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-pawn.png"))) ; Black pawn
+(define W-PAWN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-pawn.png"))) ; White pawn
 
 ; Bishops
 (define B-BISHOP-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-bishop.png"))) ; Black bishop 
@@ -122,21 +118,18 @@
 
 ; Rooks
 (define B-ROOK-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-rook.png"))) ; Black rook
-(define W-ROOK-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-rook.png"))) ; White rook 1
+(define W-ROOK-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-rook.png"))) ; White rook
 
 ; Knights
-(define B-KNIGHT1-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-knight.png"))) ; Black knight 1
-(define B-KNIGHT2-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-knight.png"))) ; Black knight 2
-
-(define W-KNIGHT1-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-knight.png"))) ; White knight 1
-(define W-KNIGHT2-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-knight.png"))) ; White knight 2
+(define B-KNIGHT-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-knight.png"))) ; Black knight
+(define W-KNIGHT-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-knight.png"))) ; White knight
 
 ; Defining the images dimensions
-(define pawn-width (image-width B-PAWN1-IMAGE))   ; Pawn width
-(define pawn-height (image-height B-PAWN1-IMAGE)) ; Pawn height
+(define pawn-width (image-width B-PAWN-IMAGE))   ; Pawn width
+(define pawn-height (image-height B-PAWN-IMAGE)) ; Pawn height
 
-(define bishop-width (image-width B-BISHOP1-IMAGE))   ; Bishop width
-(define bishop-height (image-height B-BISHOP1-IMAGE)) ; Bishop height
+(define bishop-width (image-width B-BISHOP-IMAGE))   ; Bishop width
+(define bishop-height (image-height B-BISHOP-IMAGE)) ; Bishop height
 
 (define king-width (image-width B-KING-IMAGE))   ; King width
 (define king-height (image-height B-KING-IMAGE)) ; King height
@@ -144,11 +137,11 @@
 (define queen-width (image-width B-QUEEN-IMAGE))   ; Queen width
 (define queen-height (image-height B-QUEEN-IMAGE)) ; Queen height
 
-(define rook-width (image-width B-ROOK1-IMAGE))   ; Rook width
-(define rook-height (image-height B-ROOK1-IMAGE)) ; Rook height
+(define rook-width (image-width B-ROOK-IMAGE))   ; Rook width
+(define rook-height (image-height B-ROOK-IMAGE)) ; Rook height
 
-(define knight-width (image-width B-KNIGHT1-IMAGE))   ; Knight width
-(define knight-height (image-height B-KNIGHT1-IMAGE)) ; Knight height
+(define knight-width (image-width B-KNIGHT-IMAGE))   ; Knight width
+(define knight-height (image-height B-KNIGHT-IMAGE)) ; Knight height
 
 ; Defining the chessboard pieces
 ; White pawns
@@ -212,33 +205,23 @@
 ; iniital state of the game
 (define INITIAL-STATE 
   (vector
-    ; Row 0 - Black Special Pieces row
     (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 B-QUEEN B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
-    
-    ; Row 1 - Black pawns
     (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
-    
-    ; Rows 2-5 - Empty spaces
     (vector 0 0 0 0 0 0 0 0)
     (vector 0 0 0 0 0 0 0 0)
     (vector 0 0 0 0 0 0 0 0)
     (vector 0 0 0 0 0 0 0 0)
-    
-    ; Row 6 - White pawns
     (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
-    
-    ; Row 7 - White Special Pieces row
     (vector W-ROOK1 W-KNIGHT1 W-BISHOP1 W-QUEEN W-KING W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; Functions ;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;; inside-image? ;;;;;
-
-;; Input/Output
 ; inside-image? : Number Number Piece -> Boolean
 ; checks if the mouse click is within the image's clickable area
+; header:
 
 ;; Examples
 (check-expect (inside-image? 10 10 B-PAWN1) #f)
@@ -254,10 +237,9 @@
          (>= mouse-y (- piece-y (/ (piece-height piece) 2)))
          (<= mouse-y (+ piece-y (/ (piece-height piece) 2))))))
 
-;;;;; highlight-piece ;;;;;
-
+; highlight-piece : Piece Scene Number Number
 ; Helper function to highlight the selected piece
-
+; header: 
 (define (highlight-piece piece scene x y)
   (let ([img (if (eq? piece selected-piece)
                  (overlay 
@@ -274,32 +256,17 @@
                 (+ (* y SQUARE-SIDE) (/ SQUARE-SIDE 2))
                 scene)))
 
-;;;;; vector-to-list-of-lists ;;;;;
+; vector-to-list-of-lists : Vector<Vector> -> List<List>>
+;
+; header:
 
 ;; Implementation
 (define (vector-to-list-of-lists vector-board)
   (map vector->list (vector->list vector-board)))
 
-;;;;; piece-current-pos ;;;;;
-
-; Helper function to find a piece's current position in the board
-
-;; Implementation
-(define (piece-current-pos target-piece)
-  (let find-pos ([row 0])
-    (if (< row 8)
-        (let find-col ([col 0])
-          (if (< col 8)
-              (let ([current-piece (vector-ref (vector-ref BOARD-VECTOR row) col)])
-                (if (eq? current-piece target-piece)
-                    (make-posn col row)
-                    (find-col (add1 col))))
-              (find-pos (add1 row))))
-        (make-posn 0 0)))) ; fallback position if piece is not found
-
-;;;;; find-king ;;;;;
-
+; find-king: Color AppState -> Posn
 ; Helper function to find a king's position
+; header:
 
 ;; Implementation
 (define (find-king color state)
@@ -316,9 +283,9 @@
               (find-pos (add1 row))))
         #f)))
 
-;;;;; king-in-check? ;;;;;
-
+; king-in-check? : Color AppState -> Boolean
 ; Helper function to check if a king is in check
+; header: 
 
 ;; Implementation
 (define (king-in-check? king-color state)
@@ -526,7 +493,7 @@
                   (piece-repeatable? piece)
                   (piece-player piece)
                   (piece-color piece)
-                  (piece-dragged? piece)
+                  (piece-selected? piece)
                   (rectangle 0 0 "solid" "transparent")
                   (piece-width piece)
                   (piece-height piece)
@@ -566,17 +533,17 @@
         (begin
           ; Check for castling
           (if (and (equal? (piece-type selected-piece) "king")
-                   (not (piece-dragged? selected-piece)) ; King has not moved
+                   (not (piece-selected? selected-piece)) ; King has not moved
                    (or (and (= target-col (+ orig-col 2)) ; Castling right
                             (let ([rook (vector-ref (vector-ref state orig-row) 7)])
                               (and (piece? rook)
                                    (equal? (piece-type rook) "rook")
-                                   (not (piece-dragged? rook))))) ; Rook has not moved
+                                   (not (piece-selected? rook))))) ; Rook has not moved
                        (and (= target-col (- orig-col 3)) ; Castling left
                             (let ([rook (vector-ref (vector-ref state orig-row) 0)])
                               (and (piece? rook)
                                    (equal? (piece-type rook) "rook")
-                                   (not (piece-dragged? rook))))))) ; Rook has not moved
+                                   (not (piece-selected? rook))))))) ; Rook has not moved
               (begin
                 ; Perform castling
                 (let ([rook-col (if (= target-col (+ orig-col 2)) 7 0)]
@@ -725,7 +692,7 @@
                                   (+ (posn-y pos) (posn-y dir))))
                         KING-QUEEN-MOVES)]
                    [castling-moves
-                    (if (not (piece-dragged? piece)) ; King hasn't moved
+                    (if (not (piece-selected? piece)) ; King hasn't moved
                         (let ([row (posn-y pos)])
                           (append
                            ; Kingside castling (right)
@@ -733,7 +700,7 @@
                                   (let ([rook (vector-ref (vector-ref state row) 7)])
                                     (and (piece? rook)
                                          (equal? (piece-type rook) "rook")
-                                         (not (piece-dragged? rook))))
+                                         (not (piece-selected? rook))))
                                   ; Check if squares between king and rook are empty
                                   (not (piece? (vector-ref (vector-ref state row) 5)))
                                   (not (piece? (vector-ref (vector-ref state row) 6))))
@@ -744,7 +711,7 @@
                                   (let ([rook (vector-ref (vector-ref state row) 0)])
                                     (and (piece? rook)
                                          (equal? (piece-type rook) "rook")
-                                         (not (piece-dragged? rook))))
+                                         (not (piece-selected? rook))))
                                   ; Check if squares between king and rook are empty
                                   (not (piece? (vector-ref (vector-ref state row) 3)))
                                   (not (piece? (vector-ref (vector-ref state row) 2)))
@@ -805,9 +772,10 @@
                        (cons next-pos moves)]))))
               directions)))
 
-;;;;; handle-mouse ;;;;;
 
 ; handle-mouse : State Number Number String -> State
+; Handles mouse events
+; header
 
 ;; Implmentation
 (define (handle-mouse state x y event)
@@ -898,8 +866,7 @@
    (empty-scene WINDOW-WIDTH WINDOW-HEIGHT "honeydew")))
 
 
-; end-game
-; also disconnects!!!! + resets the chessboard
+; end-game : void
 (define (end-game)
  (begin
    (set! GAME-STATE "NO-GAME")
@@ -911,8 +878,11 @@
 (define (exit-game)
  (set! GAME-STATE "END-CONFIRMATION"))
 
+; Copy of the initial state, so that it can be restored before a new game.
 (define BOARD-STATE (vector-copy-deep INITIAL-STATE))
 
+; reset-chessboard : void
+; resets the chessboard after the game ends
 (define (reset-chessboard)
   (begin
     (set! selected-piece #f)
@@ -920,7 +890,7 @@
     (set! game-over #f)
     (vector-copy! INITIAL-STATE 0 BOARD-STATE)))
 
-;; INPUT/OUTPUT
+
 ; handle-key: AppState KeyEvent -> AppState
 ; modify state 's' in response to 'key' being pressed
 ; header: (define (handle-key s key) s)
@@ -936,6 +906,7 @@
 ; render : AppState -> ????
 ; redners different views base on the GAME-STATE
 ; header: (define (render state) ...)
+
 (define (render state)
   (cond
     [(string=? "GAME" GAME-STATE) (render-chessboard state)]
@@ -943,7 +914,7 @@
     [(string=? "END-CONFIRMATION" GAME-STATE) (render-exit state)]
     [else (render-welcome state)]))
 
-; Run the program
+
 (big-bang INITIAL-STATE
   (name "Chess")
   (on-mouse handle-mouse)
