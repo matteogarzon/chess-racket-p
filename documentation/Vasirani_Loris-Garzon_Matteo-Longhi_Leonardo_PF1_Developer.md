@@ -83,7 +83,15 @@ Other functions defined are:
 
 ### piece.rkt
 
-- It
+- It defines:
+- the piece structure.
+- the Color type ("White" or "Black")
+- the GameState type, that is a Vector<Vector> where each inner vector represents a row of the chessboard and the elements are a piece or an empty square (a 0).
+- Various types of move, like diagonal, vertical, for the knight, for the rook, etc.
+- The elements of the chessboard: the alternated square colors, the square size, the ratio for rendering pieces relatively to the square size, the chessboard itself and the empty chessboard.
+- The images for the various pieces.
+- The dimensions of the various pieces.
+- The BOARD-VECTOR: the initial setup of the chessboard, with all the pieces in their starting positions.
 
 ### server.rkt
 
