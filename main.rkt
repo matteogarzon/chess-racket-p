@@ -1,14 +1,21 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname main) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+;%%%%%%%%%%%%%%%%%%%%;
+;#### CHESS GAME ####;
+;%%%%%%%%%%%%%%%%%%%%;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; Libraries ;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; Require
 (require 2htdp/image)
 (require 2htdp/universe)
 (require racket/base)
 (require "logic.rkt")
+
+; Provide
 (provide INITIAL-STATE)
 (provide handle-mouse)
 (provide render)
@@ -22,7 +29,6 @@
 ;   type           :    String         ; The type of piece (e.g., "pawn", "king")
 ;   movements      :    List<Posn>     ; List of possible movement directions
 ;   repeatable?    :    Boolean        ; Whether the piece can repeat its movement
-;   player         :    Number         ; 1 for black, 2 for white
 ;   color          :    String         ; "black" or "white"
 ;   selected?      :    Boolean        ; Whether piece is currently selected
 ;   img            :    Image          ; Visual representation
@@ -30,8 +36,8 @@
 ;   height         :    Number         ; Height of piece image
 ;   present?       :    Boolean        ; Whether piece is still in play
 ; interpretation: a piece of the chessboard with his own type, movement-state,
-; repeatable-state, player, color, selected-state, image, width, height, and present-state
-(define-struct piece [type movement repeatable? player color selected? img width height present?] #:transparent)
+; repeatable-state, color, selected-state, image, width, height, and present-state
+(define-struct piece [type movement repeatable? color selected? img width height present?] #:transparent)
 
 ; a Color is one of the following:
 ; - "White"
@@ -46,8 +52,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Defining the squares colors
-(define SQUARE-COLOR-1 "light blue")   ; Color 1
-(define SQUARE-COLOR-2 "white") ; Color 2
+(define SQUARE-COLOR-1 "light blue") ; Color 1
+(define SQUARE-COLOR-2 "white")      ; Color 2
 
 ; Defining the side of the squares
 (define SQUARE-SIDE 64)
@@ -100,27 +106,21 @@
 (define EMPTY-CHESSBOARD (overlay CHESSBOARD (empty-scene (* SQUARE-SIDE 8) (* SQUARE-SIDE 8))))
 
 ; Setting the images of the pieces
-; Pawns
 (define B-PAWN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-pawn.png"))) ; Black pawn
 (define W-PAWN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-pawn.png"))) ; White pawn
 
-; Bishops
-(define B-BISHOP-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-bishop.png"))) ; Black bishop 
+(define B-BISHOP-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-bishop.png"))) ; Black bishop
 (define W-BISHOP-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-bishop.png"))) ; White bishop
 
-; Kings
 (define B-KING-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-king.png"))) ; Black king
 (define W-KING-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-king.png"))) ; White king
 
-; Queens
 (define B-QUEEN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-queen.png"))) ; Black queen
 (define W-QUEEN-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-queen.png"))) ; White queen
 
-; Rooks
 (define B-ROOK-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-rook.png"))) ; Black rook
 (define W-ROOK-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-rook.png"))) ; White rook
 
-; Knights
 (define B-KNIGHT-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/Black Pieces/b-knight.png"))) ; Black knight
 (define W-KNIGHT-IMAGE (scale/xy DIV-RATIO DIV-RATIO (bitmap "Images/White Pieces/w-knight.png"))) ; White knight
 
@@ -145,62 +145,62 @@
 
 ; Defining the chessboard pieces
 ; White pawns
-(define W-PAWN1 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
-(define W-PAWN2 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
-(define W-PAWN3 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
-(define W-PAWN4 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
-(define W-PAWN5 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
-(define W-PAWN6 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
-(define W-PAWN7 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
-(define W-PAWN8 (make-piece "pawn" VERTICAL-MOVES #f 2 "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN1 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN2 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN3 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN4 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN5 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN6 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN7 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
+(define W-PAWN8 (make-piece "pawn" VERTICAL-MOVES #f "white" #f W-PAWN-IMAGE pawn-width pawn-height #t))
 
 ; White king
-(define W-KING (make-piece "king" KING-QUEEN-MOVES #f 2 "white" #f W-KING-IMAGE king-width king-height #t))
+(define W-KING (make-piece "king" KING-QUEEN-MOVES #f "white" #f W-KING-IMAGE king-width king-height #t))
 
 ; White queen
-(define W-QUEEN (make-piece "queen" KING-QUEEN-MOVES #t 2 "white" #f W-QUEEN-IMAGE queen-width queen-height #t))
+(define W-QUEEN (make-piece "queen" KING-QUEEN-MOVES #t "white" #f W-QUEEN-IMAGE queen-width queen-height #t))
 
 ; White bishops
-(define W-BISHOP1 (make-piece "bishop" DIAGONAL-MOVES #t 2 "white" #f W-BISHOP-IMAGE bishop-width bishop-height #t))
-(define W-BISHOP2 (make-piece "bishop" DIAGONAL-MOVES #t 2 "white" #f W-BISHOP-IMAGE bishop-width bishop-height #t))
+(define W-BISHOP1 (make-piece "bishop" DIAGONAL-MOVES #t "white" #f W-BISHOP-IMAGE bishop-width bishop-height #t))
+(define W-BISHOP2 (make-piece "bishop" DIAGONAL-MOVES #t "white" #f W-BISHOP-IMAGE bishop-width bishop-height #t))
 
 ; White rooks
-(define W-ROOK1 (make-piece "rook" ROOK-MOVES #t 2 "white" #f W-ROOK-IMAGE rook-width rook-height #t))
-(define W-ROOK2 (make-piece "rook" ROOK-MOVES #t 2 "white" #f W-ROOK-IMAGE rook-width rook-height #t))
+(define W-ROOK1 (make-piece "rook" ROOK-MOVES #t "white" #f W-ROOK-IMAGE rook-width rook-height #t))
+(define W-ROOK2 (make-piece "rook" ROOK-MOVES #t "white" #f W-ROOK-IMAGE rook-width rook-height #t))
 
 ; White knights
-(define W-KNIGHT1 (make-piece "knight" KNIGHT-MOVES #t 2 "white" #f W-KNIGHT-IMAGE knight-width knight-height #t))
-(define W-KNIGHT2 (make-piece "knight" KNIGHT-MOVES #t 2 "white" #f W-KNIGHT-IMAGE knight-width knight-height #t))
+(define W-KNIGHT1 (make-piece "knight" KNIGHT-MOVES #t "white" #f W-KNIGHT-IMAGE knight-width knight-height #t))
+(define W-KNIGHT2 (make-piece "knight" KNIGHT-MOVES #t "white" #f W-KNIGHT-IMAGE knight-width knight-height #t))
 
 ; Black pawns
-(define B-PAWN1 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
-(define B-PAWN2 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
-(define B-PAWN3 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
-(define B-PAWN4 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
-(define B-PAWN5 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
-(define B-PAWN6 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
-(define B-PAWN7 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
-(define B-PAWN8 (make-piece "pawn" VERTICAL-MOVES #f 1 "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN1 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN2 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN3 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN4 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN5 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN6 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN7 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
+(define B-PAWN8 (make-piece "pawn" VERTICAL-MOVES #f "black" #f B-PAWN-IMAGE pawn-width pawn-height #t))
 
 ; Black king
-(define B-KING (make-piece "king" KING-QUEEN-MOVES #t 1 "black" #f B-KING-IMAGE king-width king-height #t))
+(define B-KING (make-piece "king" KING-QUEEN-MOVES #t "black" #f B-KING-IMAGE king-width king-height #t))
 
 ; Black queen
-(define B-QUEEN (make-piece "queen" KING-QUEEN-MOVES #t 1 "black" #f B-QUEEN-IMAGE queen-width queen-height #t))
+(define B-QUEEN (make-piece "queen" KING-QUEEN-MOVES #t "black" #f B-QUEEN-IMAGE queen-width queen-height #t))
 
 ; Black bishops
-(define B-BISHOP1 (make-piece "bishop" DIAGONAL-MOVES #t 1 "black" #f B-BISHOP-IMAGE  bishop-width bishop-height #t))
-(define B-BISHOP2 (make-piece "bishop" DIAGONAL-MOVES #t 1  "black" #f B-BISHOP-IMAGE bishop-width bishop-height #t))
+(define B-BISHOP1 (make-piece "bishop" DIAGONAL-MOVES #t "black" #f B-BISHOP-IMAGE  bishop-width bishop-height #t))
+(define B-BISHOP2 (make-piece "bishop" DIAGONAL-MOVES #t  "black" #f B-BISHOP-IMAGE bishop-width bishop-height #t))
 
 ; Black rooks
-(define B-ROOK1 (make-piece "rook" ROOK-MOVES #t 1 "black" #f B-ROOK-IMAGE rook-width rook-height #t))
-(define B-ROOK2 (make-piece "rook" ROOK-MOVES #t 1 "black" #f B-ROOK-IMAGE rook-width rook-height #t))
+(define B-ROOK1 (make-piece "rook" ROOK-MOVES #t "black" #f B-ROOK-IMAGE rook-width rook-height #t))
+(define B-ROOK2 (make-piece "rook" ROOK-MOVES #t "black" #f B-ROOK-IMAGE rook-width rook-height #t))
 
 ; Black knights
-(define B-KNIGHT1 (make-piece "knight" KNIGHT-MOVES #t 1 "black" #f B-KNIGHT-IMAGE knight-width knight-height #t))
-(define B-KNIGHT2 (make-piece "knight" KNIGHT-MOVES #t 1 "black" #f B-KNIGHT-IMAGE knight-width knight-height #t))
+(define B-KNIGHT1 (make-piece "knight" KNIGHT-MOVES #t "black" #f B-KNIGHT-IMAGE knight-width knight-height #t))
+(define B-KNIGHT2 (make-piece "knight" KNIGHT-MOVES #t "black" #f B-KNIGHT-IMAGE knight-width knight-height #t))
 
-; iniital state of the game
+; Defining the iniital state of the game
 (define INITIAL-STATE 
   (vector
     (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 B-QUEEN B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
@@ -212,34 +212,44 @@
     (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
     (vector W-ROOK1 W-KNIGHT1 W-BISHOP1 W-QUEEN W-KING W-BISHOP2 W-KNIGHT2 W-ROOK2)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; Functions ;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; inside-image? : Number Number Piece -> Boolean
-; checks if the mouse click is within the image's clickable area
-; header:
+;;;;; highlight-piece ;;;;;
+
+;; Input/Output
+; highlight-piece : Piece Scene Posn -> Scene
+; Highlights a piece on the board if it's selected, otherwise renders normally
+; header: (define (highlight-piece piece scene position) EMPTY-CHESSBOARD)
+
+;; Constants for Examples
+; Defining a black rook with 'selected?' set to #t
+(define B-ROOK-S (make-piece "rook" 
+                           ROOK-MOVES
+                           #t ; repeatable?
+                           "black" 
+                           #t ; selected?
+                           B-ROOK-IMAGE 
+                           knight-width 
+                           knight-height 
+                           #t)) ; present?
 
 ;; Examples
-(check-expect (inside-image? 10 10 B-PAWN1) #f)
-(check-expect (inside-image? 10 10 W-BISHOP2) #f)
-(check-expect (inside-image? (/ (* SQUARE-SIDE 9) 2) (/ SQUARE-SIDE 2) B-KING) #t)
+(check-expect (highlight-piece B-ROOK1 EMPTY-CHESSBOARD (make-posn 0 0)) (place-image (piece-img B-ROOK1) 32 32 EMPTY-CHESSBOARD))
+(check-expect (highlight-piece B-PAWN8 EMPTY-CHESSBOARD (make-posn 7 2)) (place-image (piece-img B-PAWN8) 480 160 EMPTY-CHESSBOARD))
+(check-expect (highlight-piece B-ROOK-S EMPTY-CHESSBOARD (make-posn 0 0)) (place-image
+                                                                           (overlay
+                                                                            (overlay (rectangle SQUARE-SIDE SQUARE-SIDE "outline" "Gold")
+                                                                                     (rectangle (- SQUARE-SIDE 1) (- SQUARE-SIDE 1) "outline" "Gold")
+                                                                                     (rectangle (- SQUARE-SIDE 2) (- SQUARE-SIDE 2) "outline" "Gold")
+                                                                                     (rectangle (- SQUARE-SIDE 3) (- SQUARE-SIDE 3) "outline" "Gold")
+                                                                                     (rectangle (- SQUARE-SIDE 4) (- SQUARE-SIDE 4) "outline" "Gold"))
+                                                                            (piece-img B-ROOK-S)) 32 32 EMPTY-CHESSBOARD))
 
 ;; Implementation
-(define (inside-image? mouse-x mouse-y piece)
-  (let ([piece-x (* (posn-x (piece-movement piece)) SQUARE-SIDE)]
-        [piece-y (* (posn-y (piece-movement piece)) SQUARE-SIDE)])
-    (and (>= mouse-x (- piece-x (/ (piece-width piece) 2)))
-         (<= mouse-x (+ piece-x (/ (piece-width piece) 2)))
-         (>= mouse-y (- piece-y (/ (piece-height piece) 2)))
-         (<= mouse-y (+ piece-y (/ (piece-height piece) 2))))))
-
-; highlight-piece : Piece Scene Number Number
-; Helper function to highlight the selected piece
-; header: 
-(define (highlight-piece piece scene x y)
-  (let ([img (if (eq? piece selected-piece)
+(define (highlight-piece piece scene position)
+  (let ([img (if (piece-selected? piece)
                  (overlay 
                   (overlay  ; Multiple overlays to create thicker border
                    (rectangle SQUARE-SIDE SQUARE-SIDE "outline" "Gold")
@@ -250,20 +260,47 @@
                   (piece-img piece))
                  (piece-img piece))])
     (place-image img
-                (+ (* x SQUARE-SIDE) (/ SQUARE-SIDE 2))
-                (+ (* y SQUARE-SIDE) (/ SQUARE-SIDE 2))
+                (+ (* (posn-x position) SQUARE-SIDE) (/ SQUARE-SIDE 2))
+                (+ (* (posn-y position) SQUARE-SIDE) (/ SQUARE-SIDE 2))
                 scene)))
 
-; vector-to-list-of-lists : Vector<Vector> -> List<List>>
-; header:
+;;;;; vector-to-list-of-lists ;;;;;
+
+;; Input/Output
+; vector-to-list-of-lists : Vector<Vector<Any>> -> List<List<Any>>
+; Converts a 2D vector into a list of lists
+; header: (define (vector-to-list-of-lists vector-board) '())
+
+;; Examples
+(check-expect (vector-to-list-of-lists (vector (vector 1 2) (vector 3 4))) '((1 2) (3 4)))
+(check-expect (vector-to-list-of-lists (vector (vector 2 1 4 3))) '((2 1 4 3)))
 
 ;; Implementation
 (define (vector-to-list-of-lists vector-board)
   (map vector->list (vector->list vector-board)))
 
-; find-king: Color AppState -> Posn
-; Helper function to find a king's position
-; header:
+;;;;; CHECKMATE FUNCTIONS ;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;; find-king ;;;;;
+
+;; Input/Output
+; find-king : String GameState -> Posn
+; Finds the position of the specified color's king
+; header: (define (find-king color state) (make-posn 0 0))
+
+;; Examples
+(check-expect (find-king "white" (vector
+                                 (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 B-QUEEN B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
+                                 (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 0 0 W-KING 0 0 0) ; White king moved to center
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
+                                 (vector W-ROOK1 W-KNIGHT1 W-BISHOP1 W-QUEEN 0 W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+                         (make-posn 4 4)) ; Expect king at new position
+(check-expect (find-king "black" INITIAL-STATE) (make-posn 4 0))
 
 ;; Implementation
 (define (find-king color state)
@@ -280,9 +317,33 @@
               (find-pos (add1 row))))
         #f)))
 
-; king-in-check? : Color AppState -> Boolean
-; Helper function to check if a king is in check
-; header: 
+;;;;; king-in-check? ;;;;;
+
+; king-in-check? : Color GameState -> Boolean
+; Determines if the specified color's king is in check
+; header: (define (king-in-check? king-color state) #t)
+
+;; Examples
+(check-expect (king-in-check? "white" (vector
+                                      (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 B-QUEEN B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
+                                      (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
+                                      (vector 0 0 0 0 0 0 0 0)
+                                      (vector 0 0 0 0 0 0 0 0)
+                                      (vector 0 0 0 0 W-KING 0 0 0) ; White king moved to center
+                                      (vector 0 0 0 0 0 0 0 0)
+                                      (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
+                                      (vector W-ROOK1 W-KNIGHT1 W-BISHOP1 W-QUEEN 0 W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+              #f)
+(check-expect (king-in-check? "white" (vector
+                                      (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 B-QUEEN B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
+                                      (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
+                                      (vector 0 0 0 0 W-KING 0 0 0)
+                                      (vector 0 0 0 0 0 0 0 0)
+                                      (vector 0 0 0 0 0 0 0 0)
+                                      (vector 0 0 0 0 0 0 0 0)
+                                      (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
+                                      (vector W-ROOK1 W-KNIGHT1 W-BISHOP1 W-QUEEN 0 W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+              #t)
 
 ;; Implementation
 (define (king-in-check? king-color state)
@@ -303,7 +364,14 @@
 
 ;;;;; get-attack-path ;;;;;
 
+;; Input/Output
+; get-attack-path : Posn Posn -> List<Posn>
 ; Returns the path between the attacking piece and the king
+; header: (define (get-attack-path attacker-pos king-pos) (make-posn 0 0))
+
+;; Examples
+(check-expect (get-attack-path (make-posn 0 0) (make-posn 2 2))
+              (list (make-posn 2 2) (make-posn 1 1) (make-posn 0 0)))
 
 ;; Implementation
 (define (get-attack-path attacker-pos king-pos)
@@ -320,7 +388,37 @@
             (loop next-pos (cons current-pos path)))
           (cons current-pos path)))))
 
-(define (get-check-path state king-color)
+;;;;; get-check-path ;;;;;
+
+;; Input/Output
+; get-check-path : GameState String -> List<Posn>
+; Returns the path of squares that could block a check
+; header: (define (get-check-path state king-color) '())
+
+;; Examples
+(check-expect (get-check-path "white" (vector
+                                 (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 B-QUEEN B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
+                                 (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 0 0 W-KING 0 0 0) ; White king moved to center
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
+                                 (vector W-ROOK1 W-KNIGHT1 W-BISHOP1 W-QUEEN 0 W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+                         '())
+(check-expect (get-check-path "white" (vector
+                                 (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 0 B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
+                                 (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 0 0 B-QUEEN 0 0 0)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 W-KNIGHT1 0 W-KING 0 0 0)
+                                 (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
+                                 (vector W-ROOK1 0 W-BISHOP1 W-QUEEN 0 W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+                         (list (make-posn 4 3) (make-posn 4 4)))
+
+;; Implementation
+(define (get-check-path king-color state)
   (let* ([king-pos (find-king king-color state)]
          [attacking-pieces 
           (filter (lambda (pos)
@@ -347,10 +445,12 @@
           (cons attacker-pos path-positions))
         '())))
 
+;;;;; render-chessboard ;;;;;
 
-; render-chessboard : AppState -> Scene
-; renders the chessboard based on the AppState
-; header: (define (render-chessboard state) Scene)
+;; Input/Output
+; render-chessboard : GameState -> Scene
+; Renders the current state of the chessboard
+; header: (define (render-chessboard state) EMPTY-CHESSBOARD)
 
 ;; Implementation
 (define (render-chessboard state)
@@ -376,7 +476,7 @@
                                        (+ (* row-idx SQUARE-SIDE) (/ SQUARE-SIDE 2))
                                        scene)
                                       ; Normal piece rendering
-                                      (highlight-piece piece scene col-idx row-idx))
+                                      (highlight-piece piece scene (make-posn col-idx row-idx)))
                                   scene)))
                           scene
                           (build-list 8 values)))
@@ -416,17 +516,64 @@
                     valid-moves))
             scene-with-pieces))))
 
-; get-winner-text : void -> String
+;;;;; get-winner-text ;;;;;
+
+;; Input/Output
+; get-winner-text : Void -> String
 ; returns the text of who won the game based on the turn color.
 ; header: (define (get-winner-text) "Player 1 wins!")
+
+;; Implementation
 (define (get-winner-text)
   (cond
     [(string=? "white" turn-color) "Player 1 wins!"]
     [else "Player 2 wins!"]))
 
+;;;;; would-be-in-check? ;;;;;
 
-; would-be-in-check? : Piece Posn Posn AppState -> Boolean
-; checks if a move would put the king in check
+;; Input/Output
+; would-be-in-check? : Piece Posn Posn GameState -> Boolean
+; Checks if moving a piece would put its own king in check
+; header: (define (would-be-in-check? piece orig-pos new-pos state) #t)
+
+;; Examples
+(check-expect (would-be-in-check? W-KING 
+                                 (make-posn 4 5)
+                                 (make-posn 4 4)
+                                 (vector
+                                  (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 0 B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
+                                  (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
+                                  (vector 0 0 0 0 0 0 0 0)
+                                  (vector 0 0 0 0 0 0 0 0)
+                                  (vector 0 0 0 B-QUEEN 0 0 0 0)  ; Queen moved to create check
+                                  (vector 0 0 W-KNIGHT1 0 W-KING 0 0 0)
+                                  (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
+                                  (vector W-ROOK1 0 W-BISHOP1 W-QUEEN 0 W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+              #t)
+(check-expect (would-be-in-check? B-KING 
+                                 (make-posn 4 3)
+                                 (make-posn 4 4)
+                                 (vector
+                                  (vector 0 0 0 0 0 0 0 0)
+                                  (vector 0 0 0 0 0 0 0 0)
+                                  (vector 0 0 0 0 0 0 0 0)
+                                  (vector 0 0 0 0 B-KING 0 0 0)  ; Black king at (4,3)
+                                  (vector 0 0 0 0 0 0 0 W-QUEEN) ; White queen at (7,4)
+                                  (vector 0 0 0 0 0 0 0 0)
+                                  (vector 0 0 0 0 0 0 0 0)
+                                  (vector 0 0 0 0 0 0 0 0)))
+              #t)
+(check-expect (would-be-in-check? B-KING (make-posn 4 5) (make-posn 5 5) (vector
+                                 (vector B-ROOK1 B-KNIGHT1 B-BISHOP1 0 B-KING B-BISHOP2 B-KNIGHT2 B-ROOK2)
+                                 (vector B-PAWN1 B-PAWN2 B-PAWN3 B-PAWN4 B-PAWN5 B-PAWN6 B-PAWN7 B-PAWN8)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 0 B-QUEEN 0 0 0 0)
+                                 (vector 0 0 0 0 0 0 0 0)
+                                 (vector 0 0 W-KNIGHT1 0 W-KING 0 0 0)
+                                 (vector W-PAWN1 W-PAWN2 W-PAWN3 W-PAWN4 W-PAWN5 W-PAWN6 W-PAWN7 W-PAWN8)
+                                 (vector W-ROOK1 0 W-BISHOP1 W-QUEEN 0 W-BISHOP2 W-KNIGHT2 W-ROOK2)))
+              #f)
+
 ;; Implementation
 (define (would-be-in-check? piece orig-pos new-pos state)
   (let* ([test-state (vector-copy-deep state)]
@@ -434,15 +581,29 @@
          [orig-col (posn-x orig-pos)]
          [new-row (posn-y new-pos)]
          [new-col (posn-x new-pos)])
-    ; Make the move on the test board
+    ; Clear original position
     (vector-set! (vector-ref test-state orig-row) orig-col 0)
-    (vector-set! (vector-ref test-state new-row) new-col piece)
+    ; Place piece in new position
+    (vector-set! (vector-ref test-state new-row) new-col 
+                 (make-piece (piece-type piece)
+                            (piece-movement piece)
+                            (piece-repeatable? piece)
+                            (piece-color piece)
+                            #t ; mark as moved
+                            (piece-img piece)
+                            (piece-width piece)
+                            (piece-height piece)
+                            #t))
     ; Check if the king would be in check after this move
     (king-in-check? (piece-color piece) test-state)))
 
+;;;;; vector-copy-deep ;;;;;
+
+;; Input/Output
 ; vector-copy-deep : Vector<Any> -> Vector<Any>
 ; Helper function to deep copy a vector (needed for the test board)
 ; header: (define (vector-copy-deep v) v)
+
 ;; Implementation
 (define (vector-copy-deep v)
   (let* ([len (vector-length v)]
@@ -458,33 +619,54 @@
           new-vec))
     (copy-elements! 0)))
 
+;;;;; which-square? ;;;;;
 
 ; which-square? : Number Number -> Posn
 ; Converts mouse coordinates to board position
 ; header: (define (which-square? Piece) (make-posn 1 1))
+
+;; Examples
+(check-expect (which-square? 65 65) (make-posn 1 1))
+(check-expect (which-square? 32 32) (make-posn 0 0))
+
 ;; Implementation
 (define (which-square? x y)
   (make-posn (floor (/ x SQUARE-SIDE))
              (floor (/ y SQUARE-SIDE))))
 
 
+;;;;; same-color? ;;;;;
+
+;; Input/Output
 ; same-color? : Piece Piece -> Boolean
-; says if two pieces have the same color
-; header: (define (same-color? dragged-piece pieces) #true)
+; Determines if two pieces are the same color
+; header: (define (same-color? dragged-piece piece) #t)
+
+;; Examples
+(check-expect (same-color? W-PAWN1 W-KING) #t)
+(check-expect (same-color? W-PAWN1 B-KING) #f)
+
 ;; Implementation
 (define (same-color? dragged-piece piece)
   (and (piece-present? dragged-piece)
        (piece-present? piece)
        (equal? (piece-color dragged-piece) (piece-color piece))))
 
-;;;;; Handle mouse events ;;;;;
+;;;;; CHECKMATE FUNCTIONS ;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define turn-color "white") ; "black" or "white" (w starts!)
+;; Constants
+(define turn-color "white")
 (define selected-piece #f)
 (define selected-pos #f)
 (define game-over #f)
 
 ;;;;; handle-move ;;;;;
+
+;; Input/Output
+; handle-move : GameState Posn -> GameState
+; Moves a selected piece to the target position if the move is valid
+; header: (define (handle-move state target-pos) state)
 
 ;; Implementation
 (define (handle-move state target-pos)
@@ -501,99 +683,107 @@
         (begin
           ; Check for castling
           (if (and (equal? (piece-type selected-piece) "king")
-                   (not (piece-selected? selected-piece)) ; King has not moved
-                   (or (and (= target-col (+ orig-col 2)) ; Castling right
+                   (not (piece-selected? selected-piece))
+                   (or (and (= target-col (+ orig-col 2))
                             (let ([rook (vector-ref (vector-ref state orig-row) 7)])
                               (and (piece? rook)
                                    (equal? (piece-type rook) "rook")
-                                   (not (piece-selected? rook))))) ; Rook has not moved
-                       (and (= target-col (- orig-col 3)) ; Castling left
+                                   (not (piece-selected? rook)))))
+                       (and (= target-col (- orig-col 3))
                             (let ([rook (vector-ref (vector-ref state orig-row) 0)])
                               (and (piece? rook)
                                    (equal? (piece-type rook) "rook")
-                                   (not (piece-selected? rook))))))) ; Rook has not moved
+                                   (not (piece-selected? rook)))))))
               (begin
                 ; Perform castling
                 (let ([rook-col (if (= target-col (+ orig-col 2)) 7 0)]
                       [new-rook-col (if (= target-col (+ orig-col 2)) (- target-col 1) (+ target-col 1))])
-                  ; Move king
+                  ; Move king with selected? set to #f
                   (vector-set! (vector-ref state orig-row) orig-col 0)
                   (vector-set! (vector-ref state target-row) target-col
                                (make-piece (piece-type selected-piece)
                                            (piece-movement selected-piece)
                                            (piece-repeatable? selected-piece)
-                                           (piece-player selected-piece)
                                            (piece-color selected-piece)
-                                           #t ; mark as moved
+                                           #f ; set selected? to false
                                            (piece-img selected-piece)
                                            (piece-width selected-piece)
                                            (piece-height selected-piece)
                                            #t))
-                  ; Move rook
+                  ; Move rook with selected? set to #f
                   (let ([rook (vector-ref (vector-ref state orig-row) rook-col)])
                     (vector-set! (vector-ref state orig-row) rook-col 0)
                     (vector-set! (vector-ref state target-row) new-rook-col
                                  (make-piece (piece-type rook)
                                              (piece-movement rook)
                                              (piece-repeatable? rook)
-                                             (piece-player rook)
                                              (piece-color rook)
-                                             #t ; mark as moved
+                                             #f ; set selected? to false
                                              (piece-img rook)
                                              (piece-width rook)
                                              (piece-height rook)
-                                             #t)))))
+                                             #t)))
+                  (change-turn)))
               ; Normal move or promotion
               (begin
-                ; Clear original position
                 (vector-set! (vector-ref state orig-row) orig-col 0)
-                ; Check for pawn promotion
                 (let ([new-piece 
                       (if (and (equal? (piece-type selected-piece) "pawn")
                               (or (and (equal? (piece-color selected-piece) "white")
-                                      (= target-row 0))  ; White pawn reached top
+                                      (= target-row 0))
                                   (and (equal? (piece-color selected-piece) "black")
-                                      (= target-row 7)))) ; Black pawn reached bottom
-                          ; Create a new queen
+                                      (= target-row 7))))
                           (make-piece "queen"
                                     KING-QUEEN-MOVES
                                     #t
-                                    (piece-player selected-piece)
                                     (piece-color selected-piece)
-                                    #t
+                                    #f ; set selected? to false
                                     (if (equal? (piece-color selected-piece) "white")
                                         W-QUEEN-IMAGE
                                         B-QUEEN-IMAGE)
                                     queen-width
                                     queen-height
                                     #t)
-                          ; Keep the original piece
                           (make-piece (piece-type selected-piece)
                                     (piece-movement selected-piece)
                                     (piece-repeatable? selected-piece)
-                                    (piece-player selected-piece)
                                     (piece-color selected-piece)
-                                    #t ; mark as moved
+                                    #f ; set selected? to false
                                     (piece-img selected-piece)
                                     (piece-width selected-piece)
                                     (piece-height selected-piece)
                                     #t))])
-                  ; Move piece to new position
-                  (begin
-                    (vector-set! (vector-ref state target-row) target-col new-piece)
-                    (change-turn)))))
+                  (vector-set! (vector-ref state target-row) target-col new-piece)
+                  (change-turn))))
           state)
         state)))
 
-; change-turn : void -> void
-; changes the value of turn-color
 (define (change-turn)
   (cond
     [(string=? turn-color "white") (set! turn-color "black")]
     [else (set! turn-color "white")]))
 
+;;;;; get-valid-moves ;;;;;
 
-; get-valid-moves
+;; Input/Output
+; get-valid-moves : Piece Posn GameState -> List<Posn>
+; Returns a list of all valid positions where the given piece can move
+; header: (define (get-valid-moves piece pos state) '())
+
+;; Examples
+; Testing pawn moves
+(check-expect (get-valid-moves W-PAWN1 
+                              (make-posn 0 6) 
+                              INITIAL-STATE)
+              (list (make-posn 0 5) (make-posn 0 4))) ; Can move one or two squares forward from starting position
+
+; Testing king moves (no castling available)
+(check-expect (get-valid-moves W-KING 
+                              (make-posn 4 7) 
+                              INITIAL-STATE)
+              '()) ; No valid moves at start as surrounded by own pieces
+
+;; Implementation
 (define (get-valid-moves piece pos state)
   (let ([moves
          (cond
@@ -708,7 +898,19 @@
            [else '()])])  ; Default case returns empty list
     (filter in-bounds? moves)))
 
-; calculates moves for pieces that can be blocked by other pieces
+;;;;; calculate-blocked-moves ;;;;;
+
+;; Input/Output
+; calculate-blocked-moves : Posn List<Posn> Boolean GameState -> List<Posn>
+; Calculates valid moves for pieces that can be blocked by other pieces
+; header: (define (calculate-blocked-moves pos directions repeatable? state) '())
+
+;; Examples
+(check-expect (calculate-blocked-moves (make-posn 0 0) 
+                                     (list (make-posn 1 1)) 
+                                     #f 
+                                     (vector (vector 0 0) (vector 0 0)))
+              (list (make-posn 1 1)))
 
 ;; Implementation
 (define (calculate-blocked-moves pos directions repeatable? state)
@@ -740,10 +942,45 @@
                        (cons next-pos moves)]))))
               directions)))
 
+;;;;; handle-mouse ;;;;;
 
-; handle-mouse : State Number Number String -> State
-; Handles mouse events
-; header
+;; Input/Output
+; handle-mouse : GameState Number Number String -> GameState
+; Handles mouse events for piece selection and movement
+; Where:
+;   - state: current game state
+;   - x: x-coordinate of mouse click
+;   - y: y-coordinate of mouse click
+;   - event: type of mouse event ("button-down", "button-up", etc.)
+; header: (define (handle-mouse state x y event) INITIAL-STATE)
+
+;; Examples
+; Clicking on empty square when no piece selected
+(check-expect (begin 
+                (set! selected-piece #f)
+                (set! selected-pos #f)
+                (set! turn-color "white")
+                (handle-mouse INITIAL-STATE 
+                            (* 4 SQUARE-SIDE) ; x coordinate (center of board)
+                            (* 4 SQUARE-SIDE) ; y coordinate (center of board)
+                            "button-down"))
+              INITIAL-STATE)
+
+; Clicking on white piece during white's turn
+(check-expect (begin 
+                (set! selected-piece #f)
+                (set! selected-pos #f)
+                (set! turn-color "white")
+                (set! game-over #f)
+                (let ([result (handle-mouse INITIAL-STATE 
+                                          (* 1 SQUARE-SIDE) ; x coordinate (knight position)
+                                          (* 7 SQUARE-SIDE) ; y coordinate (bottom row)
+                                          "button-down")])
+                  (and (equal? selected-piece W-KNIGHT1)
+                      (equal? selected-pos (make-posn 1 7))
+                      (equal? result INITIAL-STATE))))
+              #t)
+
 
 ;; Implmentation
 (define (handle-mouse state x y event)
@@ -765,6 +1002,7 @@
                   ; Check if after the move, the king of the moving player is still in check
                   (when (king-in-check? moving-color new-state)
                     (set! game-over #t))
+                  ; Deselect the piece after moving
                   (set! selected-piece #f)
                   (set! selected-pos #f)
                   new-state))]
@@ -773,30 +1011,67 @@
                    (piece-present? clicked-piece)
                    (equal? (piece-color clicked-piece) turn-color))
               (begin
+                ; First deselect the previously selected piece if there is one
+                (when selected-piece
+                      (let ([prev-row (posn-y selected-pos)]
+                            [prev-col (posn-x selected-pos)])
+                        (vector-set! (vector-ref state prev-row) prev-col
+                                   (make-piece (piece-type selected-piece)
+                                             (piece-movement selected-piece)
+                                             (piece-repeatable? selected-piece)
+                                             (piece-color selected-piece)
+                                             #f  ; Set selected? to false
+                                             (piece-img selected-piece)
+                                             (piece-width selected-piece)
+                                             (piece-height selected-piece)
+                                             (piece-present? selected-piece)))))
+                ; Then select the new piece
+                (vector-set! (vector-ref state row) col
+                            (make-piece (piece-type clicked-piece)
+                                      (piece-movement clicked-piece)
+                                      (piece-repeatable? clicked-piece)
+                                      (piece-color clicked-piece)
+                                      #t  ; Set selected? to true
+                                      (piece-img clicked-piece)
+                                      (piece-width clicked-piece)
+                                      (piece-height clicked-piece)
+                                      (piece-present? clicked-piece)))
+                ; Update the selected piece reference
                 (set! selected-piece clicked-piece)
                 (set! selected-pos clicked-pos)
                 state)]
-             ; If we clicked elsewhere, deselect
+             ; If we clicked elsewhere, deselect any previously selected piece
              [else
               (begin
+                (when selected-piece
+                      (let ([prev-row (posn-y selected-pos)]
+                            [prev-col (posn-x selected-pos)])
+                        (vector-set! (vector-ref state prev-row) prev-col
+                                   (make-piece (piece-type selected-piece)
+                                             (piece-movement selected-piece)
+                                             (piece-repeatable? selected-piece)
+                                             (piece-color selected-piece)
+                                             #f  ; Set selected? to false
+                                             (piece-img selected-piece)
+                                             (piece-width selected-piece)
+                                             (piece-height selected-piece)
+                                             (piece-present? selected-piece)))))
                 (set! selected-piece #f)
                 (set! selected-pos #f)
                 state)]))]
         [else state])))
 
 
-;;;;;;;;;;;;;;;
-;; RENDERING ;;
-;;;;;;;;;;;;;;;
+;;;;; RENDERING ;;;;;
+;;;;;;;;;;;;;;;;;;;;;
 
-(define quit? #f)
 (define GAME-STATE "NO-GAME") ; can be either NO-GAME or GAME
 
 ;; Constants for the welcome screen
 (define WINDOW-WIDTH 512)
 (define WINDOW-HEIGHT 512)
-(define TEXT-BACKGROUND-WIDTH 400) 
-(define TEXT-BACKGROUND-HEIGHT 100)
+(define TEXT-BACKGROUND-WIDTH 300) 
+(define TEXT-BACKGROUND-HEIGHT 80)
 (define TEXT-BACKGROUND-COLOR "lightblue")
 (define TEXT-COLOR "black")
 (define NETWORK-STATE 'waiting)
@@ -805,17 +1080,17 @@
 (define TITLE-TEXT (text "Welcome to Chess!" 40 TEXT-COLOR))
 (define AUTHORS-TEXT (text "By Leonardo Longhi, Loris Vasirani & Matteo Garzon" 20 TEXT-COLOR))
 
-(define INSTRUCTIONS-TEXT 
+(define INSTRUCTIONS-TEXT
   (overlay
    (above
     (text "Instructions:" 24 TEXT-COLOR)
     (text "• Press 'g' to begin the game." 18 TEXT-COLOR)
-    (text "• Press 'q' to end the game anytime." 18 TEXT-COLOR)
-    (text "• On this screen, press 'c' to close the program." 18 TEXT-COLOR))
+    (text "• Press 'q' to end the game anytime." 18 TEXT-COLOR))
    (rectangle TEXT-BACKGROUND-WIDTH TEXT-BACKGROUND-HEIGHT "solid" TEXT-BACKGROUND-COLOR)))
 
-; render-welcome: AppState -> Scene
-; main welcome screen
+;;;;; render-welcome ;;;;;
+
+;; Main welcome screen scene
 (define (render-welcome state)
   (place-images
    (list TITLE-TEXT
@@ -826,8 +1101,8 @@
          (make-posn (/ WINDOW-WIDTH 2) (/ WINDOW-HEIGHT 2)))
    (empty-scene WINDOW-WIDTH WINDOW-HEIGHT "azure")))
 
-; render-screen: AppState -> Scene
-; renders the prompt scene to end the game
+;;;;; render-exit ;;;;;
+
 (define (render-exit state)
   (place-image
    (text "Press 'y' to end the game.\nTo resume, press 'n'." 
@@ -837,8 +1112,9 @@
    (/ WINDOW-HEIGHT 2)
    (empty-scene WINDOW-WIDTH WINDOW-HEIGHT "honeydew")))
 
+;;;;; end-game ;;;;;
+
 ; end-game : void
-; Retuerns to the welcome page and resets the chessboard
 (define (end-game)
  (begin
    (set! GAME-STATE "NO-GAME")
@@ -853,8 +1129,23 @@
 ; Copy of the initial state, so that it can be restored before a new game.
 (define BOARD-STATE (vector-copy-deep INITIAL-STATE))
 
-; reset-chessboard : void
-; resets the chessboard after the game ends
+;;;;; reset-chessboard ;;;;;
+
+;; Input/Output
+; reset-chessboard : Void -> Void
+; Resets the chessboard to its initial state
+; header: (define (reset-chessboard) (void))
+
+;; Examples
+(check-expect (begin 
+                (set! selected-piece W-PAWN1)
+                (set! selected-pos (make-posn 0 6))
+                (set! game-over #t)
+                (reset-chessboard)
+                (list selected-piece selected-pos game-over))
+              (list #f #f #f))
+
+;; Implementation
 (define (reset-chessboard)
   (begin
     (set! selected-piece #f)
@@ -862,47 +1153,42 @@
     (set! game-over #f)
     (vector-copy! INITIAL-STATE 0 BOARD-STATE)))
 
-; handle-key: AppState KeyEvent -> AppState
-; modify state 's' in response to 'key' being pressed
-; header: (define (handle-key s key) s)
+;;;;; handle-key ;;;;;
 
-; template
-; (define (handle-key state key)
-;  (cond
-;    [(...GAME-STATE "GAME"...) (...key "q"...)) (...state...)]
-;    [(...GAME-STATE "END-CONFIRMATION"...) (...key "y"...)) (...state...)]
-;    [(...GAME-STATE "END-CONFIRMATION"...) (...key "n"...)) (...state...)]
-;    [(...GAME-STATE "NO-GAME"...) (...key "g"...)) (...state...)] 
-;    [else state]))
+;; Input/Output
+; handle-key : GameState String -> GameState
+; Handles keyboard input for game control
+; header: (define (handle-key state key) state)
 
-; example
-(check-expect (handle-key INITIAL-STATE "q") INITIAL-STATE)
+;; Examples
+(check-expect (begin (set! GAME-STATE "GAME") (handle-key INITIAL-STATE "q") GAME-STATE) "END-CONFIRMATION")
+(check-expect (begin (set! GAME-STATE "NO-GAME") (handle-key INITIAL-STATE "g") GAME-STATE) "GAME")
 
+;; Implementation
 (define (handle-key state key)
   (cond
     [(and (string=? GAME-STATE "GAME" ) (string=? key "q")) (begin (exit-game) state)] ; shows exit prompt (doesn't end game!)
     [(and (string=? GAME-STATE "END-CONFIRMATION") (string=? key "y")) (begin (end-game) state)] ; ends game + disconnects? 
     [(and (string=? GAME-STATE "END-CONFIRMATION") (string=? key "n")) (begin (start-game) state)] ; resumes game
     [(and (string=? GAME-STATE "NO-GAME") (string=? key "g")) (begin (start-game) state)] ; starts game
-    [(and (string=? GAME-STATE "NO-GAME") (string=? key "c")) (set! quit? #t)] ; starts game
     [else state]))
 
-; render : AppState -> Scene
-; redners different views base on the GAME-STATE
-; header: (define (render state) scene)
+;;;;; render ;;;;;
 
-; template
-; (define (render state)
-;  (cond
-;    [(....GAME-STATE "GAME"...) (...state...)]
-;    [(....GAME-STATE "END-CONFIRMATION"...) (...state...)]
-;    [(....GAME-STATE "END-GAME"...) (...state...)]
-;    [else (...state...)]))
+;; Input/Output
+; render : GameState -> Scene
+; Renders the appropriate screen based on game state
+; header: (define (render state) (empty-scene 0 0))
 
-; examples
-(check-expect (render INITIAL-STATE) (render-welcome INITIAL-STATE))
+;; Examples
+(check-expect (begin (set! GAME-STATE "NO-GAME") 
+                    (render INITIAL-STATE))
+              (render-welcome INITIAL-STATE))
+(check-expect (begin (set! GAME-STATE "END-CONFIRMATION") 
+                    (render INITIAL-STATE))
+              (render-exit INITIAL-STATE))
 
-; implementation
+;; Implementation
 (define (render state)
   (cond
     [(string=? "GAME" GAME-STATE) (render-chessboard state)]
@@ -910,13 +1196,9 @@
     [(string=? "END-CONFIRMATION" GAME-STATE) (render-exit state)]
     [else (render-welcome state)]))
 
-; can-quit? : AppState -> Booelan
-; whether app can quit or not.
-(define (can-quit? state) quit?)
 
 (big-bang INITIAL-STATE
   (name "Chess")
   (on-mouse handle-mouse)
   (on-key handle-key)
-  (stop-when can-quit?)
   (to-draw render))
