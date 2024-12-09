@@ -790,13 +790,14 @@
 ;; RENDERING ;;
 ;;;;;;;;;;;;;;;
 
+(define quit? #f)
 (define GAME-STATE "NO-GAME") ; can be either NO-GAME or GAME
 
 ;; Constants for the welcome screen
 (define WINDOW-WIDTH 512)
 (define WINDOW-HEIGHT 512)
-(define TEXT-BACKGROUND-WIDTH 300) 
-(define TEXT-BACKGROUND-HEIGHT 80)
+(define TEXT-BACKGROUND-WIDTH 400) 
+(define TEXT-BACKGROUND-HEIGHT 100)
 (define TEXT-BACKGROUND-COLOR "lightblue")
 (define TEXT-COLOR "black")
 (define NETWORK-STATE 'waiting)
@@ -810,7 +811,8 @@
    (above
     (text "Instructions:" 24 TEXT-COLOR)
     (text "• Press 'g' to begin the game." 18 TEXT-COLOR)
-    (text "• Press 'q' to end the game anytime." 18 TEXT-COLOR))
+    (text "• Press 'q' to end the game anytime." 18 TEXT-COLOR)
+    (text "• On this screen, press 'c' to close the program." 18 TEXT-COLOR))
    (rectangle TEXT-BACKGROUND-WIDTH TEXT-BACKGROUND-HEIGHT "solid" TEXT-BACKGROUND-COLOR)))
 
 ; render-welcome: AppState -> Scene
@@ -866,18 +868,43 @@
 ; modify state 's' in response to 'key' being pressed
 ; header: (define (handle-key s key) s)
 
+; template
+; (define (handle-key state key)
+;  (cond
+;    [(...GAME-STATE "GAME"...) (...key "q"...)) (...state...)]
+;    [(...GAME-STATE "END-CONFIRMATION"...) (...key "y"...)) (...state...)]
+;    [(...GAME-STATE "END-CONFIRMATION"...) (...key "n"...)) (...state...)]
+;    [(...GAME-STATE "NO-GAME"...) (...key "g"...)) (...state...)] 
+;    [else state]))
+
+; example
+(check-expect (handle-key INITIAL-STATE "q") INITIAL-STATE)
+
 (define (handle-key state key)
   (cond
     [(and (string=? GAME-STATE "GAME" ) (string=? key "q")) (begin (exit-game) state)] ; shows exit prompt (doesn't end game!)
     [(and (string=? GAME-STATE "END-CONFIRMATION") (string=? key "y")) (begin (end-game) state)] ; ends game + disconnects? 
     [(and (string=? GAME-STATE "END-CONFIRMATION") (string=? key "n")) (begin (start-game) state)] ; resumes game
     [(and (string=? GAME-STATE "NO-GAME") (string=? key "g")) (begin (start-game) state)] ; starts game
+    [(and (string=? GAME-STATE "NO-GAME") (string=? key "c")) (set! quit? #t)] ; starts game
     [else state]))
 
-; render : AppState -> ????
+; render : AppState -> Scene
 ; redners different views base on the GAME-STATE
-; header: (define (render state) ...)
+; header: (define (render state) scene)
 
+; template
+; (define (render state)
+;  (cond
+;    [(....GAME-STATE "GAME"...) (...state...)]
+;    [(....GAME-STATE "END-CONFIRMATION"...) (...state...)]
+;    [(....GAME-STATE "END-GAME"...) (...state...)]
+;    [else (...state...)]))
+
+; examples
+(check-expect (render INITIAL-STATE) (render-welcome INITIAL-STATE))
+
+; implementation
 (define (render state)
   (cond
     [(string=? "GAME" GAME-STATE) (render-chessboard state)]
@@ -885,9 +912,11 @@
     [(string=? "END-CONFIRMATION" GAME-STATE) (render-exit state)]
     [else (render-welcome state)]))
 
+(define (can-quit? state) quit?)
 
 (big-bang INITIAL-STATE
   (name "Chess")
   (on-mouse handle-mouse)
   (on-key handle-key)
+  (stop-when can-quit?)
   (to-draw render))
